@@ -12,6 +12,8 @@ In order to remix this code sample you will need the following:
 - An App containing the credentials required to use the Twitter API
 - OAuth 2.0 turned on in your App’s authentication settings
 - You will also need to update your `.env` file to include your client ID, client secret and redirect URI. You can obtain your client ID and secret from your App's authentication settings and your redirect URI should be `your-glitch-project.glitch.me/oauth/callback`. This must match the redirect URI in your App's authentication settings.
+- This application is [boosted using Glitch's pro plan](https://glitch.com/pricing?utm_medium=weblink&utm_source=dev.to&utm_campaign=blog&utm_content=dev)
+
 
 ## Making this bot your own
 

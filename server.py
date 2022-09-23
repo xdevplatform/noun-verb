@@ -13,9 +13,15 @@ from requests_oauthlib import OAuth2Session, TokenUpdated
 from flask import Flask, request, redirect, session, url_for, render_template
 
 
+class Config:
+    SCHEDULER_API_ENABLED = True
+
+
 app = Flask(__name__)
 app.secret_key = os.urandom(50)
+
 scheduler = APScheduler()
+
 
 client_id = os.environ.get("CLIENT_ID")
 client_secret = os.environ.get("CLIENT_SECRET")
@@ -31,7 +37,6 @@ code_verifier = re.sub("[^a-zA-Z0-9]+", "", code_verifier)
 code_challenge = hashlib.sha256(code_verifier.encode("utf-8")).digest()
 code_challenge = base64.urlsafe_b64encode(code_challenge).decode("utf-8")
 code_challenge = code_challenge.replace("=", "")
-
 
 
 def make_token():
@@ -61,12 +66,14 @@ def post_tweet(payload, token):
         },
     )
 
-
+# You can adjust the timing for your own bot
+@scheduler.task('cron', id='everyother', hour='*')
 def every_other():
     db = dbm.open(".my_store", "c")
     t = db["token"]
     bb_t = t.decode("utf8").replace("'", '"')
     data = ast.literal_eval(bb_t)
+    twitter = make_token()
     refreshed_token = twitter.refresh_token(
         client_id=client_id,
         client_secret=client_secret,
@@ -118,7 +125,7 @@ def callback():
 
 
 if __name__ == "__main__":
-    # You may want to change the timing of the bot
-    scheduler.add_job(id = 'Scheduled Task', func=every_other, trigger="interval", minutes=30)
-    scheduler.start()
-    app.run()
+  app.config.from_object(Config())
+  scheduler.init_app(app)
+  scheduler.start()
+  app.run()
